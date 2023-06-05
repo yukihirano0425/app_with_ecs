@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cicd_handson
+Parameters:
+  PjName:
+    Type: String
+    Default: cicdhandson
+Resources:
+  # CodeDeploy Application
+  CiCdHandsonCodeDeployApplication:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: !Sub "${PjName}_app"
+      ComputePlatform: Lambda
+      Tags:
+        - Key: Name
+          Value: !Sub "${PjName}"
+
+  CiCdHandsonCodeDeployGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref CiCdHandsonCodeDeployApplication
+      DeploymentGroupName: cicdhandson_app_grp
+      DeploymentConfigName: CodeDeployDefault.LambdaAllAtOnce
+      ServiceRoleArn: !GetAtt CICDHandsonCodeDeployIAMRole.Arn
+      DeploymentStyle:
+        DeploymentType: BLUE_GREEN
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+      AutoRollbackConfiguration:
+        Enabled: true
+        Events:
+          - DEPLOYMENT_FAILURE
+      Tags:
+        - Key: Name
+          Value: "cicd_handson"
+
+  CICDHandsonCodeDeployIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: iam-role-codedeploy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codedeploy.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+      Policies:
+        - PolicyName: CodeDeployServiceRolePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+                  - s3:ListBucket
+                  - s3:ListObjects
+                Resource:
+                  - !ImportValue CICDHandsonBucketArn
+                  - !Join ["/", [!ImportValue CICDHandsonBucketArn, "*"]]
+      Tags:
+        - Key: Name
+          Value: cicd_handson
+
+Outputs:
+  CiCdHandsonCodeDeployApplication:
+    Value: !Ref CiCdHandsonCodeDeployApplication
+    Export:
+      Name: CiCdHandsonApp
