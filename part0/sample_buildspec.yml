@@ -1,0 +1,21 @@
+version: 0.2
+phases:
+  install:
+    on-failure: ABORT
+    commands:
+      - echo "install phases"
+  pre_build:
+    on-failure: ABORT
+    commands:
+      - echo "pre_build phases"
+  build:
+    on-failure: ABORT
+    commands:
+      - echo "build phases"
+  post_build:
+    on-failure: ABORT
+    commands:
+      - echo "post_build phases"
+artifacts:
+  files:
+    - "**/*"
