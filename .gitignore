@@ -1,5 +1,5 @@
 *.json
 .DS_Store
 *.sh
-!/part0/setup_codecommit.sh
+!/part0/setup_*.sh
 *.sh
