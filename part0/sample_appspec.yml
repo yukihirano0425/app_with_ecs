@@ -1,0 +1,15 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /var/www/html
+permissions:
+  - object: /var/www/html
+    owner: apache
+    group: apache
+    mode: 755
+    type:
+      - file
+      - directory
+#hooks:
+#      デプロイする際に動かすシェルスクリプトなどを設定するセクション
