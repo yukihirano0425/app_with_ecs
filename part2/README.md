@@ -1,5 +1,31 @@
 # Part2で使うコマンド
 
+## CloudFormationの操作
+
+### アクセスキーの作成
+
+```sh
+aws cloudformation deploy --stack-name iam --template-file ./iam_user.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
+```
+
+```sh
+aws cloudformation describe-stacks --stack-name iam --profile cicd_handson
+```
+
+### CodeCommitでリポジトリを作成する
+
+```sh
+aws cloudformation deploy --stack-name codecommit --template-file ./codecommit.yml --tags Name=cicdhandson --profile cicd_handson
+```
+
+```sh
+aws cloudformation describe-stacks --stack-name codecommit --profile cicd_handson
+```
+
+```sh
+git clone codecommit::ap-northeast-1://cicd_handson@cicd_handson
+```
+
 ## dockerfileをリモートリポジトリに追加する
 
 ```sh
@@ -65,6 +91,20 @@ aws ecr list-images --profile {プロファイル名} --repository-name cicdhand
 +----------+
 |  latest  |
 +----------+
+```
+
+## 片付け
+
+### CodeCommit
+
+```sh
+aws cloudformation delete-stack --stack-name codecommit --profile cicd_handson
+```
+
+## IAM
+
+```sh
+aws cloudformation delete-stack --stack-name iam --profile cicd_handson
 ```
 
 ### S3バケットを空にする
