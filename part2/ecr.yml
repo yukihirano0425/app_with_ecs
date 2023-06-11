@@ -11,6 +11,10 @@ Resources:
     Properties:
       RepositoryName: !Sub "${PjName}"
 Outputs:
+  CICDHandsonECRArn:
+    Value: !GetAtt CICDHandsonCodeBuildECR.Arn
+    Export:
+      Name: CICDHandsonECRImageArn
   CICDHandsonECR:
     Value: !Ref CICDHandsonCodeBuildECR
     Export:
