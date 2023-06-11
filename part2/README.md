@@ -235,6 +235,32 @@ aws ecr list-images --profile cicd_handson --repository-name cicdhandson --query
 
 ## 片付け
 
+### パイプラインを削除
+
+```sh
+aws cloudformation delete-stack --stack-name pipline --profile cicd_handson
+```
+
+### CodeCommit
+
+```sh
+aws cloudformation delete-stack --stack-name codecommit --profile cicd_handson
+```
+
+## IAM
+
+```sh
+aws cloudformation delete-stack --stack-name pipeline-iam-role --profile cicd_handson
+```
+
+```sh
+aws cloudformation delete-stack --stack-name code-build --profile cicd_handson
+```
+
+```sh
+aws cloudformation delete-stack --stack-name code-build-iam-role --profile cicd_handson
+```
+
 ### S3バケットを空にする
 
 ```sh
@@ -253,24 +279,6 @@ aws s3 ls s3://cicdhandson-bucket-{アカウントID} --profile cicd_handson
 
 ```sh
 aws s3 rb s3://cicdhandson-bucket-{アカウントID} --force
-```
-
-### CodeCommit
-
-```sh
-aws cloudformation delete-stack --stack-name codecommit --profile cicd_handson
-```
-
-### パイプラインを削除
-
-```sh
-aws cloudformation delete-stack --stack-name pipline --profile cicd_handson
-```
-
-## IAM
-
-```sh
-aws cloudformation delete-stack --stack-name iam --profile cicd_handson
 ```
 
 ## まとめ
