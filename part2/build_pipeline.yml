@@ -5,22 +5,6 @@ Parameters:
     Type: String
     Default: cicdhandson
 Resources:
-  # Save Artifact
-  CICDHandsonBuket:
-    Type: AWS::S3::Bucket
-    Properties:
-      VersioningConfiguration:
-        Status: "Suspended"
-      BucketName: !Sub "${PjName}-bucket-${AWS::AccountId}"
-      AccessControl: "Private"
-      Tags:
-        - Key: "Name"
-          Value: !Sub "${PjName}"
-  # ECR
-  CICDHandsonCodeBuildECR:
-    Type: "AWS::ECR::Repository"
-    Properties:
-      RepositoryName: !Sub "${PjName}"
   # CodeBuild
   CICDHandsonCodeBuildPj:
     Type: AWS::CodeBuild::Project
@@ -57,8 +41,6 @@ Resources:
           Value: cicd_handson
     DependsOn:
       - CiCdHandsonCodeBuildRole
-      - CICDHandsonCodeBuildECR
-      - CICDHandsonBuket
   # CodeBuildRole
   CiCdHandsonCodeBuildRole:
     Type: "AWS::IAM::Role"
@@ -82,7 +64,7 @@ Resources:
                   - "ecr:BatchGetImage"
                   - "ecr:BatchCheckLayerAvailability"
                 Resource:
-                  - !GetAtt CICDHandsonCodeBuildECR.Arn
+                  - !ImportValue CICDHandsonCodeBuildECR
               - Effect: Allow
                 Action:
                   - "ecr:CompleteLayerUpload"
@@ -90,7 +72,7 @@ Resources:
                   - "ecr:UploadLayerPart"
                   - "ecr:PutImage"
                 Resource:
-                  - !GetAtt CICDHandsonCodeBuildECR.Arn
+                  - !ImportValue CICDHandsonCodeBuildECR
               - Effect: Allow
                 Action:
                   - "ecr:GetAuthorizationToken"
@@ -110,11 +92,8 @@ Resources:
                   - "s3:GetBucketAcl"
                   - "s3:GetBucketLocation"
                 Resource:
-                  - !Join
-                    - ""
-                    - - !GetAtt CICDHandsonBuket.Arn
-                      - "/*"
-                  - !GetAtt CICDHandsonBuket.Arn
+                  - !Join ["", [!ImportValue CICDHandsonBucketArn, "/*"]]
+                  - !ImportValue CICDHandsonBucketArn
   # CloudWatch Logs
   CICDHandsonCloudWatchLogs:
     Type: "AWS::Logs::LogGroup"
@@ -131,7 +110,7 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       ArtifactStore:
-        Location: !Ref CICDHandsonBuket
+        Location: !ImportValue CICDHandsonBucketName
         Type: S3
       Name: !Sub "${PjName}-pipeline"
       RoleArn: !GetAtt CICDHandsonCodePipelineIAMRole.Arn
@@ -207,9 +186,9 @@ Resources:
             Resource:
               - !Join
                 - ""
-                - - !GetAtt CICDHandsonBuket.Arn
+                - - !ImportValue CICDHandsonBuketArn
                   - "/*"
-              - !GetAtt CICDHandsonBuket.Arn
+              - !ImportValue CICDHandsonBuketArn
       ManagedPolicyName: iam-policy-codepipeline
   CICDHandsonCodePipelineIAMRole:
     Type: AWS::IAM::Role
@@ -241,11 +220,14 @@ Resources:
             Action:
               - "codepipeline:StartPipelineExecution"
             Resource:
-              - !Join
-                - ""
-                - - "arn:aws:codepipeline:ap-northeast-1:"
-                  - !Sub "${AWS::AccountId}:"
-                  - !Sub "${PjName}-pipeline"
+              - !Join [
+                  "",
+                  [
+                    "arn:aws:codepipeline:ap-northeast-1:",
+                    !Sub "${AWS::AccountId}:",
+                    !Sub "${PjName}-pipeline",
+                  ],
+                ]
       ManagedPolicyName: iam-policy-eventbridge
 
   EventBridgeIAMRole:
@@ -289,11 +271,15 @@ Resources:
       Name: cicdhandson-codepipeline
       State: ENABLED
       Targets:
-        - Arn: !Join
-            - ""
-            - - "arn:aws:codepipeline:ap-northeast-1:"
-              - !Sub "${AWS::AccountId}:"
-              - !Sub "${PjName}-pipeline"
+        - Arn:
+            !Join [
+              "",
+              [
+                "arn:aws:codepipeline:ap-northeast-1:",
+                !Sub "${AWS::AccountId}:",
+                !Sub "${PjName}-pipeline",
+              ],
+            ]
           Id: !Sub "${PjName}-pipeline"
           RoleArn: !GetAtt EventBridgeIAMRole.Arn
 
@@ -302,7 +288,3 @@ Outputs:
     Value: !Ref CICDHandsonCodePipelineIAMPolicy
     Export:
       Name: CodePipelineIAMPolicyArn
-  CICDHandsonECR:
-    Value: !Ref CICDHandsonCodeBuildECR
-    Export:
-      Name: CICDHandsonECRImageURL
