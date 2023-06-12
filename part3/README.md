@@ -1,4 +1,4 @@
-# Part2
+# part3
 
 ## 事前準備
 
@@ -6,7 +6,7 @@
 
 ## IAMユーザーを作成する
 
-part2ディレクトリにある`iam_user.yml`を使ってハンズオンで利用するIAMユーザーを作成します。
+part3ディレクトリにある`iam_user.yml`を使ってハンズオンで利用するIAMユーザーを作成します。
 ※すでにAdministratorAccessで権限を作成されている場合はこの動作は不要です。
 
 `I acknowledge that AWS CloudFormation might create IAM resources with custom names.`にチェックを入れて`Submmit`をクリックします。
@@ -35,10 +35,10 @@ cat ~/.aws/credentials
 
 ### リポジトリを作成する
 
-`aws_happy_code`リポジトリでターミナルを開き、part2にディレクトリを変更します。
+`aws_happy_code`リポジトリでターミナルを開き、part3にディレクトリを変更します。
 
 ```sh
-cd ~/Desktop/aws_happy_code/part2
+cd ~/Desktop/aws_happy_code/part3
 ```
 
 以下のコマンドで`codecommit.yml`をCloudFormationで実行します。
@@ -72,39 +72,45 @@ git checkout -b main
 ```
 
 ```sh
-echo "Hello CodeBuild" > README.md
+echo "Hello Lambda" > README.md
 ```
 
 ```sh
 git add .
-git commit -m "part2"
+git commit -m "part3"
 git push -u 
 ```
 
-### code_build_handsonブランチを切る
+### lambda_handsonブランチを切る
 
 新しいブランチでビルドを実行する為にCodeBuild用に新しくブランチを切ります。
 
 ```sh
-git checkout -b code_build_handson
+git checkout -b lambda_handson
 ```
 
 ### buildspec.yamlを作成する
 
 CodeBuildで利用する設定ファイル(buildspec.yml)を作成します。
-Part2ディレクトリにあるbuildspec.ymlを`cicd_handson`リポジトリにコピーします。
+part3ディレクトリにあるbuildspec.ymlを`cicd_handson`リポジトリにコピーします。
 
 ```sh
-cp ~/Desktop/aws_happy_code/part2/buildspec.yml ~/Desktop/cicdhandson/
+cp ~/Desktop/aws_happy_code/part3/buildspec.yml ~/Desktop/cicdhandson/
 ```
 
 ### dockerfileを作成する
 
 dockerfileを追加します。
-`aws_code_happy`リポジトリに戻り、Part2ディレクトリにあるdockerfileを`cicd_handson`リポジトリにコピーします。
+`aws_code_happy`リポジトリに戻り、part3ディレクトリにあるdockerfileを`cicd_handson`リポジトリにコピーします。
 
 ```sh
-cp ~/Desktop/aws_happy_code/part2/dockerfile ~/Desktop/cicdhandson/
+cp ~/Desktop/aws_happy_code/part3/dockerfile ~/Desktop/cicdhandson/
+```
+
+### app.py　を追加
+
+```sh
+cp ~/Desktop/aws_happy_code/part3/app.py ~/Desktop/cicdhandson/
 ```
 
 ### リモートリポジトリを更新する
@@ -113,14 +119,14 @@ CodeCommitのリモートリポジトリにdockerfileをpushします。
 
 ```sh
 git add .
-git commit -m "part2"
+git commit -m "part3"
 git push -u 
 ```
 
 リモートリポジトリにブランチを追加します。
 
 ```sh
-git push --set-upstream origin code_build_handson
+git push --set-upstream origin lambda_handson
 ```
 
 ### CodeBuild用 S3バケットの作成
@@ -133,10 +139,10 @@ aws cloudformation deploy --stack-name s3 --template-file ./s3.yml --tags Name=c
 
 ### ECRリポジトリの作成
 
-`aws_happy_code`リポジトリでターミナルを開き、part2にディレクトリを変更します。
+`aws_happy_code`リポジトリでターミナルを開き、part3にディレクトリを変更します。
 
 ```sh
-cd ~/Desktop/aws_happy_code/part2
+cd ~/Desktop/aws_happy_code/part3
 ```
 
 以下のコマンドで`ecr.yml`をCloudFormationで実行します。
@@ -174,63 +180,13 @@ CloudFormationでCodePipelineを構築します。
 aws cloudformation deploy --stack-name pipeline --template-file ./pipeline.yml --tags Name=cicdhandson --profile cicd_handson
 ```
 
-### ビルドされたイメージを確認する
+### Lambdaを関数を作成する
 
-CloudFormationで作成されたリポジトリを確認します。
-
-```sh
-aws ecr describe-repositories --profile cicd_handson --output json 
-```
-
-コマンドを実行すると以下のようにリポジトリの詳細が出力されます。
-
-```json
-{
-    "repositories": [
-        {
-            "repositoryArn": "arn:aws:ecr:ap-northeast-1:{アカウント}:repository/cicdhandson",
-            "registryId": "{アカウントID}",
-            "repositoryName": "cicdhandson",
-            "repositoryUri": "{アカウントID}.dkr.ecr.ap-northeast-1.amazonaws.com/cicdhandson",
-            "createdAt": "2023-05-24T00:14:05+09:00",
-            "imageTagMutability": "MUTABLE",
-            "imageScanningConfiguration": {
-                "scanOnPush": false
-            },
-            "encryptionConfiguration": {
-                "encryptionType": "AES256"
-            }
-        }
-    ]
-}
-```
-
-イメージダイジェストを確認します。
+CloudFormationでLambdaを構築します。
+以下のコマンドで`lambda.yml`をCloudFormationで実行します。
 
 ```sh
-aws ecr list-images --profile cicdhandson --repository-name cicdhandson --query "imageIds[*].imageDigest" --output table
-```
-
-```txt
------------------------------------------------------------------------------
-|                                ListImages                                 |
-+---------------------------------------------------------------------------+
-|  sha256:2326ba7ae9bff1c55a618051b86c7d71401712898afe1a833734076962a231e5  |
-+---------------------------------------------------------------------------+
-```
-
-イメージのタグを確認します。
-
-```sh
-aws ecr list-images --profile cicd_handson --repository-name cicdhandson --query "imageIds[*].imageTag" --output table
-```
-
-```txt
-------------
-|ListImages|
-+----------+
-|  latest  |
-+----------+
+aws cloudformation deploy --stack-name lambda --template-file ./lambda.yml --tags Name=cicdhandson --profile cicd_handson
 ```
 
 ## 片付け
