@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cicd_handson
+Parameters:
+  PjName:
+    Type: String
+    Default: cicdhandson
+Resources:
+  # ECR
+  CICDHandsonCodeBuildECR:
+    Type: "AWS::ECR::Repository"
+    Properties:
+      RepositoryName: !Sub "${PjName}"
+Outputs:
+  CICDHandsonECRArn:
+    Value: !GetAtt CICDHandsonCodeBuildECR.Arn
+    Export:
+      Name: CICDHandsonECRImageArn
+  CICDHandsonECR:
+    Value: !Ref CICDHandsonCodeBuildECR
+    Export:
+      Name: CICDHandsonECRImageURL
