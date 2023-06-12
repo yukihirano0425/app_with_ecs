@@ -116,20 +116,21 @@ cp ~/Desktop/aws_happy_code/part3/app.py ~/Desktop/cicdhandson/
 ### リモートリポジトリを更新する
 
 CodeCommitのリモートリポジトリにdockerfileをpushします。
+リモートリポジトリにブランチを追加します。
 
 ```sh
 git add .
 git commit -m "part3"
-git push -u 
-```
-
-リモートリポジトリにブランチを追加します。
-
-```sh
 git push --set-upstream origin lambda_handson
 ```
 
 ### CodeBuild用 S3バケットの作成
+
+`aws_happy_code`リポジトリでターミナルを開き、part3にディレクトリを変更します。
+
+```sh
+cd ~/Desktop/aws_happy_code/part3
+```
 
 以下のコマンドで`s3.yml`をCloudFormationで実行します。
 
@@ -138,12 +139,6 @@ aws cloudformation deploy --stack-name s3 --template-file ./s3.yml --tags Name=c
 ```
 
 ### ECRリポジトリの作成
-
-`aws_happy_code`リポジトリでターミナルを開き、part3にディレクトリを変更します。
-
-```sh
-cd ~/Desktop/aws_happy_code/part3
-```
 
 以下のコマンドで`ecr.yml`をCloudFormationで実行します。
 
@@ -180,13 +175,45 @@ CloudFormationでCodePipelineを構築します。
 aws cloudformation deploy --stack-name pipeline --template-file ./pipeline.yml --tags Name=cicdhandson --profile cicd_handson
 ```
 
+### プルリクエストを作成する
+
+```sh
+aws codecommit create-pull-request --title "part3" --description "part3 lambda ci/cd" --targets repositoryName=cicdhandson,sourceReference=lambda_handson --profile cicd_handson
+```
+
+```sh
+ACCOUNT_ID=`aws sts get-caller-identity --profile cicd_handson --query 'Account' --output text` && echo $ACCOUNT_ID
+```
+
+```sh
+PULL_REQUEST_ID=`aws codecommit list-pull-requests --profile cicd_handson --pull-request-status OPEN --repository-name cicdhandson --query 'pullRequestIds' --output text` && echo $PULL_REQUEST_ID
+```
+
+```sh
+REVISIONID=`aws codecommit get-pull-request --pull-request-id $PULL_REQUEST_ID --profile cicd_handson --query 'pullRequest.revisionId' --output text` && echo $REVISIONID
+```
+
+```sh
+aws codecommit evaluate-pull-request-approval-rules --pull-request-id $PULL_REQUEST_ID --revision-id $REVISIONID --profile cicd_handson
+```
+
+```sh
+COMMITID=`aws codecommit get-branch --repository-name cicdhandson --branch-name lambda_handson --profile cicd_handson --query 'branch.commitId' --output text` && echo $COMMITID
+```
+
+### ブランチをマージする
+
+```sh
+aws codecommit merge-pull-request-by-fast-forward --pull-request-id $PULL_REQUEST_ID --source-commit-id $COMMITID --repository-name cicdhandson --profile cicd_handson
+```
+
 ### Lambdaを関数を作成する
 
 CloudFormationでLambdaを構築します。
 以下のコマンドで`lambda.yml`をCloudFormationで実行します。
 
 ```sh
-aws cloudformation deploy --stack-name lambda --template-file ./lambda.yml --tags Name=cicdhandson --profile cicd_handson
+aws cloudformation deploy --stack-name lambda --template-file ./lambda.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
 ```
 
 ### Lambda　関数のテスト

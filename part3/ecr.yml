@@ -19,3 +19,7 @@ Outputs:
     Value: !Ref CICDHandsonCodeBuildECR
     Export:
       Name: CICDHandsonECRImageURL
+  CICDHandsonRepositoryUri:
+    Value: !GetAtt CICDHandsonCodeBuildECR.RepositoryUri
+    Export:
+      Name: CICDHandsonECRRepositoryUri
