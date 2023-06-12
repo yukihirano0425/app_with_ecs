@@ -7,7 +7,8 @@ Resources:
       Role: !GetAtt CICDHandsonLambdaRole.Arn
       PackageType: Image
       Code:
-        ImageUri: !Join [":", [!ImportValue CICDHandsonECRImageURL, "latest"]]
+        ImageUri:
+          !Join [":", [!ImportValue CICDHandsonECRRepositoryUri, "latest"]]
       Architectures:
         - x86_64
       MemorySize: 512
