@@ -189,6 +189,49 @@ CloudFormationでLambdaを構築します。
 aws cloudformation deploy --stack-name lambda --template-file ./lambda.yml --tags Name=cicdhandson --profile cicd_handson
 ```
 
+### Lambda　関数のテスト
+
+AWS CLIでLambdaを実行します。
+
+```bash
+aws lambda invoke --profile cicd_handson --function-name "cicdhandsonFunc" --invocation-type RequestResponse --region "ap-northeast-1" response.json && cat response.json
+```
+
+### 新しいバージョンの関数を作成する
+
+```bash
+aws lambda update-function-code --profile cicd_handson --function-name "cicdhandsonFunc" --image-uri "{アカウントID}.dkr.ecr.ap-northeast-1.amazonaws.com/cicdhandson:latest" --publish
+```
+
+### app.py を修正する
+
+```py
+def lambda_handler(event, context):
+
+    return {
+        'Hello': 'Test Lambda 2'
+    }
+
+```
+
+### エイリアスを作成する
+
+```bash
+aws lambda create-alias --profile cicd_handson --function-name "cicdhandsonFunc" --function-version "1" --name deploy
+```
+
+### エイリアスを変更する
+
+```bash
+aws lambda update-alias --profile cicd_handson --function-name "cicdhandsonFunc" --function-version "2" --name deploy
+```
+
+### Lambda　関数のテスト(エイリアスを変更後)
+
+```bash
+aws lambda invoke --profile cicd_handson --function-name "cicdhandsonFunc:deploy" --invocation-type RequestResponse --region "ap-northeast-1" response.json && cat response.json
+```
+
 ## 片付け
 
 ### パイプラインを削除
