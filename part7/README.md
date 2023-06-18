@@ -73,35 +73,9 @@ cat ~/.aws/credentials
 
 ### リポジトリを作成する
 
-`aws_happy_code`リポジトリでターミナルを開き、part5にディレクトリを変更します。
+### リポジトリをクローンする
 
-```sh
-cd ~/Desktop/aws_happy_code/part5
-```
-
-```sh
-aws cloudformation deploy --stack-name codecommit --template-file ./codecommit.yml --tags Name=cicdhandson --profile cicd_handson
-```
-
-### CodeCommitのリポジトリをクローンする
-
-Desktop上にCodeCommitのリポジトリをcloneします。
-
-```sh
-git clone codecommit::ap-northeast-1://cicd_handson@cicdhandson ~/Desktop/cicdhandson
-```
-
-ディレクトリを移動します。
-
-```sh
-cd ~/Desktop/cicdhandson
-```
-
-### mainブランチを作成
-
-```sh
-git checkout -b main
-```
+### リモートリポジトリにプッシュ
 
 ```sh
 echo "Hello App Runner" > README.md
@@ -112,6 +86,12 @@ git add .
 git commit -m "App Runner"
 git push -u 
 ```
+
+### CodeCatalystのプロジェクトにリポジトリを追加する
+
+CodeCatalyst の[Projects](https://codecatalyst.aws/spaces/cicdhandson/projects)を開き、`Create project`をクリックします。
+
+`Start from scratch`を選択して`Project name`を入力し、`Create project`をクリックします。
 
 ### app_runner ブランチを切る
 
