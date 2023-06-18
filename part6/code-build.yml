@@ -20,12 +20,11 @@ Resources:
           - Name: AWS_ACCOUNT_ID
             Type: PLAINTEXT
             Value: !Ref AWS::AccountId
-          - Name: IMAGE_REPO_NAME
+          - Name: AWS_DOMAIN
             Type: PLAINTEXT
             Value: !Sub "${PjName}"
-          - Name: IMAGE_TAG
-            Type: PLAINTEXT
-            Value: latest
+          - Name: CODEARTIFACT_URL
+            Value: "https://$AWS_DOMAIN-$AWS_ACCOUNT_ID.d.codeartifact.$AWS_DEFAULT_REGION.amazonaws.com/npm/cicd/"
 
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/amazonlinux2-x86_64-standard:4.0
