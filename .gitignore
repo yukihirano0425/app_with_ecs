@@ -3,3 +3,5 @@
 *.sh
 !/part0/setup_*.sh
 *.sh
+node_modules
+!package.json
