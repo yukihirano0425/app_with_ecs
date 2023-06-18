@@ -31,8 +31,6 @@ aws configure --profile cicd_handson
 cat ~/.aws/credentials 
 ```
 
-### パッケージを作成
-
 ## CodeArtifactの操作
 
 ### ドメインを作成する
@@ -88,11 +86,15 @@ aws codeartifact login --tool npm --domain $AWS_DOMAIN --region $AWS_DEFAULT_REG
 aws codeartifact get-repository-endpoint --domain $AWS_DOMAIN --domain-owner $AWS_ACCOUNT_ID --repository cicd --format npm --profile cicd_handson
 ```
 
-## npmの設定
+### CODEARTIFACT_AUTH_TOKENの発行
 
 ```sh
 export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain $AWS_DOMAIN --region $AWS_DEFAULT_REGION --domain-owner $AWS_ACCOUNT_ID --query authorizationToken --output text --profile cicd_handson`
+```
 
+## npmの設定
+
+```sh
 yarn config set npmRegistryServer "$CODEARTIFACT_URL"
 yarn config set 'npmRegistries["$CODEARTIFACT_URL"].npmAuthToken' "${CODEARTIFACT_AUTH_TOKEN}"
 yarn config set 'npmRegistries["$CODEARTIFACT_URL"].npmAlwaysAuth' "true"
@@ -110,13 +112,19 @@ aws codeartifact list-packages --domain cicd-handson-domain --repository cicd --
 cd ~/Desktop/aws_happy_code/part6/sample-package
 ```
 
-## 登録されたパッケージの一覧を表示する
+CodeArtifactにパッケージを登録します。
+
+```sh
+npm publish
+```
+
+登録されたパッケージの一覧を表示します。
 
 ```sh
 aws codeartifact list-packages --domain cicd-handson-domain --repository cicd --profile cicd_handson
 ```
 
-## CodeArtifactに登録したパッケージを読み込む
+## CodeArtifactに登録したパッケージをsample-appに読み込む
 
 ```sh
 cd ~/Desktop/aws_happy_code/part6/sample-app
@@ -124,6 +132,10 @@ cd ~/Desktop/aws_happy_code/part6/sample-app
 
 ```sh
 npm install sample-package@1.0.0
+```
+
+```sh
+node index.js
 ```
 
 ## 片付け
