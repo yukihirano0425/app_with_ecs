@@ -3,7 +3,7 @@ Description: cicd_handson
 Parameters:
   PjName:
     Type: String
-    Default: HandsonPart6
+    Default: cicdhandson
 Resources:
   CICDHandsonRepository:
     Type: AWS::CodeCommit::Repository
@@ -23,3 +23,7 @@ Outputs:
     Value: !GetAtt CICDHandsonRepository.Arn
     Export:
       Name: CodeRepositoryArn
+  CodeCommitRepositoryUrl:
+    Value: !GetAtt CICDHandsonRepository.CloneUrlHttp
+    Export:
+      Name: CodeRepositoryUrl
