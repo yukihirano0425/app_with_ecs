@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: cicd_handson
+Parameters:
+  PjName:
+    Type: String
+    Default: handsonpart6
+Resources:
+  CICDHandsonArtifactDomain:
+    Type: AWS::CodeArtifact::Domain
+    Properties:
+      DomainName: !Sub "${PjName}"
+      Tags:
+        - Key: Name
+          Value: !Sub "${PjName}"
+  CICDHandsonArtifactRepository:
+    Type: AWS::CodeArtifact::Repository
+    Properties:
+      Description: !Sub "${PjName}"
+      DomainName: !Sub "${PjName}"
+      DomainOwner: !Ref "AWS::AccountId"
+      RepositoryName: !Sub "${PjName}"
+      Tags:
+        - Key: Name
+          Value: !Sub "${PjName}"
+    DependsOn:
+      - "CICDHandsonArtifactDomain"
+Outputs:
+  ArtifactDomain:
+    Value: !GetAtt "CICDHandsonArtifactDomain.Name"
+    Export:
+      Name: ArtifactDomainName
+  ArtifactRepository:
+    Value: !GetAtt "CICDHandsonArtifactRepository.Name"
+    Export:
+      Name: ArtifactRepositoryName
