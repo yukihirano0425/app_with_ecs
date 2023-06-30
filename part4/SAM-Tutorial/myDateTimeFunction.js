@@ -6,6 +6,8 @@ exports.handler = function (event, context, callback) {
     event = JSON.parse(event.body);
   }
 
+  console.log(event.body);
+
   var sc; // Status code
   var result = ""; // Response payload
 
@@ -33,25 +35,19 @@ exports.handler = function (event, context, callback) {
       }
       break;
 
-    /*      Later in this tutorial, you update this function by uncommenting 
-            this section. The framework created by AWS SAM detects the update 
-            and triggers a deployment by CodeDeploy. The deployment shifts 
-            production traffic to the updated version of this function.
-            
-            case "time":
-            var d = new Date();
-            var h = d.getHours();
-            var mi = d.getMinutes();
-            var s = d.getSeconds();
-    
-            result = {
-              "hour": h,
-              "minute": mi,
-              "second": s
-            };
-            sc = 200;
-            break;
-    */
+    case "time":
+      var d = new Date();
+      var h = d.getHours();
+      var mi = d.getMinutes();
+      var s = d.getSeconds();
+
+      result = {
+        "hour": h,
+        "minute": mi,
+        "second": s
+      };
+      sc = 200;
+      break;
     default:
       result = {
         "error": "Must specify 'date' or 'time'."
