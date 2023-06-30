@@ -31,6 +31,49 @@ Resources:
         Statement:
           - Effect: Allow
             Action:
+              - "cloudformation:DescribeChangeSet"
+              - "cloudformation:DescribeStacks"
+              - "cloudformation:CreateChangeSet"
+              - "cloudformation:ExecuteChangeSet"
+              - "cloudformation:DeleteChangeSet"
+              - "cloudformation:DescribeStackEvents"
+              - "cloudformation:GetTemplateSummary"
+              - "cloudformation:ValidateTemplate"
+              - "cloudformation:ListStacks"
+              - "iam:CreateRole"
+              - "iam:DeleteRole"
+              - "iam:AttachRolePolicy"
+              - "iam:GetRole"
+              - "iam:PassRole"
+              - "codedeploy:CreateDeployment"
+              - "codedeploy:DeleteDeployment"
+              - "codedeploy:CreateApplication"
+              - "codedeploy:DeleteApplication"
+              - "codedeploy:CreateDeploymentGroup"
+              - "codedeploy:DeleteDeploymentGroup"
+              - "codedeploy:GetDeploymentConfig"
+              - "codedeploy:GetDeployment"
+              - "codedeploy:RegisterApplicationRevision"
+              - "codedeploy:GetDeploymentGroup"
+              - "lambda:CreateFunction"
+              - "lambda:DeleteFunction"
+              - "lambda:TagResource"
+              - "lambda:GetFunction"
+              - "lambda:ListVersionsByFunction"
+              - "lambda:ListTags"
+              - "lambda:PublishVersion"
+              - "lambda:CreateAlias"
+              - "lambda:DeleteAlias"
+              - "lambda:GetAlias"
+              - "lambda:UpdateFunctionCode"
+              - "lambda:UpdateFunctionConfiguration"
+              - "iam:PutRolePolicy"
+              - "iam:DetachRolePolicy"
+              - "iam:DeleteRolePolicy"
+            Resource:
+              - "*"
+          - Effect: Allow
+            Action:
               - "ecr:GetAuthorizationToken"
             Resource:
               - "*"
@@ -53,6 +96,11 @@ Resources:
                 - - !ImportValue CICDHandsonBucketArn
                   - "/*"
               - !ImportValue CICDHandsonBucketArn
+              - !Join
+                - ""
+                - - !ImportValue CICDSamBucketArn
+                  - "/*"
+              - !ImportValue CICDSamBucketArn
 Outputs:
   CiCdHandsonCodeBuildRoleName:
     Value: !Ref CiCdHandsonCodeBuildRole
