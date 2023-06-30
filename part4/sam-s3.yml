@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: sam-build
+Parameters:
+  PjName:
+    Type: String
+    Default: sam-build
+Resources:
+  # Save Artifact
+  CICDSamBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      VersioningConfiguration:
+        Status: "Suspended"
+      BucketName: !Sub "${PjName}-bucket-${AWS::AccountId}"
+      AccessControl: "Private"
+      Tags:
+        - Key: "Name"
+          Value: !Sub "${PjName}"
+Outputs:
+  Arn:
+    Value: !GetAtt CICDSamBucket.Arn
+    Export:
+      Name: CICDSamBucketArn
+
+  Name:
+    Value: !Ref CICDSamBucket
+    Export:
+      Name: CICDSamBucketName
