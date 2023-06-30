@@ -1,9 +1,0 @@
-version: 0.0
-resources:
-  - myLambdaFunction:
-      type: "AWS::Lambda::Function"
-      properties:
-        name: "cicdhandsonFunc"
-        alias: "deploy"
-        currentVersion: "2"
-        targetVersion: "3"

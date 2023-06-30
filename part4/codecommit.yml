@@ -23,3 +23,7 @@ Outputs:
     Value: !GetAtt CICDHandsonRepository.Arn
     Export:
       Name: CodeRepositoryArn
+  CodeCommitRepositoryUrl:
+    Value: !GetAtt CICDHandsonRepository.CloneUrlHttp
+    Export:
+      Name: CodeRepositoryUrl
