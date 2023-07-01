@@ -83,6 +83,8 @@ SAM build用のS3バケットを作成するために以下のコマンドで`s3
 aws cloudformation deploy --stack-name s3-build --template-file ./sam-s3.yml --tags Name=cicdhandson --profile cicd_handson
 ```
 
+コマンドを実行することによってS3バケットが作成されます。
+
 ### リポジトリを作成する
 
 以下のコマンドで`codecommit.yml`をCloudFormationで実行します。
@@ -91,15 +93,19 @@ aws cloudformation deploy --stack-name s3-build --template-file ./sam-s3.yml --t
 aws cloudformation deploy --stack-name codecommit --template-file ./codecommit.yml --tags Name=cicdhandson --profile cicd_handson
 ```
 
+作成したCodcommitリポジトリでアプリケーションを管理します。
+
 ### CodeCommitのリポジトリをクローンする
 
 Desktop上にCodeCommitのリポジトリをcloneします。
+GitHubに馴染みのある方にとっては少し見慣れない文法かもしれませんが、CodeCommitのリポジトリをcloneするときは
+`codecommit::リージョン名://プロファイル名@リポジトリ名`を実行することでリポジトリをcloneできます。
 
 ```sh
 git clone codecommit::ap-northeast-1://cicd_handson@cicdhandson ~/Desktop/cicdhandson
 ```
 
-ディレクトリを変更します。
+cloneしたリポジトリを参照するため、ディレクトリを変更します。
 
 ```sh
 cd ~/Desktop/cicdhandson
@@ -107,19 +113,22 @@ cd ~/Desktop/cicdhandson
 
 ### mainブランチを作成
 
-main ブランチを作成します。
+cloneしたばかりのリポジトリにはmainブランチがありません。
+ハンズオンではmainブランチをデフォルトブランチとしてアプリケーションを記録します。main ブランチを作成します。
 
 ```sh
 git checkout -b main
 ```
 
-READMEを作成します。
+mainブランチを説明する`README.md`を作成します。
+WindowsやGUIによるファイル作成に慣れている人からすると違和感がある方法でファイルを作成していると思いますが、CLI上でファイルを作成する方法としては一般的な方法となるので覚えておきましょう。
 
 ```sh
 echo "Hello SAM" > README.md
 ```
 
 最後にリポジトリにファイルをpushします。
+`git add`で変更をステージに移行、commitで変更を反映したら、push でCodeCommit上のリモートブランチを更新します。
 
 ```sh
 git add .
@@ -129,13 +138,15 @@ git push -u
 
 ### CodeBuild用 S3バケットの作成
 
-`aws_happy_code`リポジトリでターミナルを開き、part4にディレクトリを変更します。
+CLI操作が可能なターミナルを開き、`aws_happy_code`リポジトリのpart4にディレクトリを変更します。
 
 ```sh
 cd ~/Desktop/aws_happy_code/part4
 ```
 
 以下のコマンドで`s3.yml`をCloudFormationで実行します。
+このS3バケットはCodeBuildが作成するアーティファクト(ビルドしたファイルなど)を一時保存しておくディレクトリです。
+CodeCommit上のファイルがCodePipelineを通してCodeBuildに伝わり、CodeBuildはCodeCommitのファイルをS3に保存します。
 
 ```sh
 aws cloudformation deploy --stack-name s3 --template-file ./s3.yml --tags Name=cicdhandson --profile cicd_handson
@@ -143,19 +154,31 @@ aws cloudformation deploy --stack-name s3 --template-file ./s3.yml --tags Name=c
 
 ### ハンズオンで利用するIAM Roleを作成する
 
-CodeBuild用のIAMロール作成します。
+以下のコマンドでCodeBuild用のIAM Role作成します。
+このRoleによって関連のサービスにCodeBuildがアクセスできます。
 
 ```sh
 aws cloudformation deploy --stack-name codebuild-iam-role --template-file ./codebuild-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
 ```
 
-EventBridge用のIAMロール作成します。
+※CodeBuildはアクセスするサービス一覧
+
+- CloudFormation
+- CodeDeploy
+- IAM
+- Lambda
+- S3
+- CloudWatch Logs
+
+EventBridge用のIAM Role作成します。この RoleはCodePipelineで利用します。
+CodePipelineを実行する際にCodeCommitの変更を検知する必要があるのですが、その際にこのIAM Roleが必要になります。
 
 ```sh
 aws cloudformation deploy --stack-name event-bridge-iam-role --template-file ./event-bridge-iam-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
 ```
 
-CodePipeline用のIAMロール作成します。
+CodePipeline用のIAM Role作成します。CodePipelineは各サービスを束ねる役割あるため、束ねるサービスのIAM Policyが必要です。
+なお、CodeDeployやLambda、CloudFormationを利用していますが、CodePipelineでは直接触れないため、IAM Policyは不要です。
 
 ```sh
 aws cloudformation deploy --stack-name pipeline-iam-role --template-file ./pipeline-iam-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
@@ -175,6 +198,8 @@ aws cloudformation deploy --stack-name code-build --template-file ./code-build.y
 CloudFormationでCodePipelineを構築します。
 以下のコマンドで`pipeline.yml`をCloudFormationで実行します。
 
+CodePipelineの構築が完了するとPipelineが動作します。
+
 ```sh
 aws cloudformation deploy --stack-name pipeline --template-file ./pipeline.yml --tags Name=cicdhandson --profile cicd_handson
 ```
@@ -182,6 +207,8 @@ aws cloudformation deploy --stack-name pipeline --template-file ./pipeline.yml -
 ### sam_handsonブランチを切る
 
 新しいブランチでビルドを実行する為にCodeBuild用に新しくブランチを切ります。
+ハンズオンではmainブランチをビルド対象としています。ゆえにmainブランチを変更するのではなくmainブランチをソースに別のブランチを作成します。
+作成したブランチで変更を管理します。
 
 ```sh
 git checkout -b sam_handson
@@ -189,14 +216,19 @@ git checkout -b sam_handson
 
 ### buildspec.ymlを作成する
 
-CodeBuildで利用する設定ファイル(buildspec.yml)を作成します。
+CodeBuildで利用する設定ファイル(`buildspec.yml`)を作成します。
 part4ディレクトリにあるbuildspec.ymlを`cicd_handson`リポジトリにコピーします。
 
 ```sh
 cp ~/Desktop/aws_happy_code/part4/buildspec.yml ~/Desktop/cicdhandson/
 ```
 
+`buildspec.yml`にはSAMアプリケーションをパッケージするコマンドとデプロイするコマンドが含まれています。
+
 ### SAMのパッケージをコピーする
+
+今回はAWSの公式ドキュメントに記載されている`SAM-Tutorial`をCodeBuildで実行します。
+ソースコードをCodeCommitリポジトリにコピーします。
 
 ```sh
 cp ~/Desktop/aws_happy_code/part4/SAM-Tutorial/* ~/Desktop/cicdhandson/
@@ -206,6 +238,7 @@ cp ~/Desktop/aws_happy_code/part4/SAM-Tutorial/* ~/Desktop/cicdhandson/
 
 CodeCommitのリモートリポジトリにdockerfileをpushします。
 リモートリポジトリにブランチを追加します。
+補足となりますが、リモートブランチを追加する時は`--set-upstream`をつけることでブランチを追加できます。
 
 ```sh
 git add .
@@ -215,30 +248,45 @@ git push --set-upstream origin sam_handson
 
 ### プルリクエストを作成する
 
+変更をmainブランチにマージするためにCodeCommit上でプルリクエストを作成します。
+
 ```sh
+# プルリクエストを作成する
 aws codecommit create-pull-request --title "part4" --description "part4 lambda ci/cd" --targets repositoryName=cicdhandson,sourceReference=sam_handson --profile cicd_handson
 ```
 
 ```sh
+# プルリクエストIDを環境変数PULL_REQUEST_IDに保存する
 PULL_REQUEST_ID=`aws codecommit list-pull-requests --profile cicd_handson --pull-request-status OPEN --repository-name cicdhandson --query 'pullRequestIds' --output text` && echo $PULL_REQUEST_ID
 ```
 
 ```sh
+# リビジョンIDを環境変数REVISIONIDに保存する
 REVISIONID=`aws codecommit get-pull-request --pull-request-id $PULL_REQUEST_ID --profile cicd_handson --query 'pullRequest.revisionId' --output text` && echo $REVISIONID
 ```
 
 ```sh
+# コミットIDを環境変数COMMITIDに保存する
 COMMITID=`aws codecommit get-branch --repository-name cicdhandson --branch-name sam_handson --profile cicd_handson --query 'branch.commitId' --output text` && echo $COMMITID
 ```
 
 ### ブランチをマージする
 
+PULL_REQUEST_IDとCOMMITIDを元にブランチをマージします。
+
 ```sh
 aws codecommit merge-pull-request-by-fast-forward --pull-request-id $PULL_REQUEST_ID --source-commit-id $COMMITID --repository-name cicdhandson --profile cicd_handson
 ```
 
+### CodeDeployで動作を見る
+
+### 動作確認
+
 ## まとめ
 
-これでハンズオンは以上です。上記の構成でCodeCommit にDockerfileをおくことにより
-buildspec.ymlの設定に従ってCodeBuildでイメージをビルドできます。これでイメージをリポジトリにpushしたことをトリガーに
-CodeDeployによるデプロイやApp Runnerへのアプリケーションデプロイができます。
+これでハンズオンは以上です。
+CodeBuild、CodeDeployを利用することで簡単にLambdaのデプロイができるようになります。
+このハンズオンで注目すべき点としてはAWSが推奨する様々なデプロイ方法をCodeDeployで制御できるところでしょう。
+
+ハンズオンでは1分ごとにトラフィックを移行して徐々に古いLambdaから新しいLambdaに入れ換えることができます。
+デプロイ方法はSAMの`template.yml`にある`DeploymentPreference`セクションに記載されていますので興味のある方は他のデプロイ方法を試してみると良いでしょう。
