@@ -13,5 +13,4 @@
 - (Part6) CodeArtifactを利用する構成
 - (Part7) CodeCatalystを利用する構成
 - (Part8) CodeGuru ReviewerでCodeCommitを自動レビューする構成
-- (Part9)GitHubとの連携 CodeCommitのデータを移行する
-- (Part10) 総括
+- (Part9) 総括
