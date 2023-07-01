@@ -120,6 +120,12 @@ cloneしたばかりのリポジトリにはmainブランチがありません�
 git checkout -b main
 ```
 
+実行結果
+
+```text
+Switched to a new branch 'main'
+```
+
 mainブランチを説明する`README.md`を作成します。
 WindowsやGUIによるファイル作成に慣れている人からすると違和感がある方法でファイルを作成していると思いますが、CLI上でファイルを作成する方法としては一般的な方法となるので覚えておきましょう。
 
@@ -155,13 +161,14 @@ aws cloudformation deploy --stack-name s3 --template-file ./s3.yml --tags Name=c
 ### ハンズオンで利用するIAM Roleを作成する
 
 以下のコマンドでCodeBuild用のIAM Role作成します。
-このRoleによって関連のサービスにCodeBuildがアクセスできます。
 
 ```sh
 aws cloudformation deploy --stack-name codebuild-iam-role --template-file ./codebuild-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
 ```
 
-※CodeBuildはアクセスするサービス一覧
+作成したRoleによって関連のサービスにCodeBuildがアクセスできます。
+
+※CodeBuildがアクセスするサービス一覧
 
 - CloudFormation
 - CodeDeploy
@@ -170,18 +177,39 @@ aws cloudformation deploy --stack-name codebuild-iam-role --template-file ./code
 - S3
 - CloudWatch Logs
 
-EventBridge用のIAM Role作成します。この RoleはCodePipelineで利用します。
+実行結果
+
+```text
+...(一部省略)
+Successfully created/updated stack - codebuild-iam-role
+```
+
+以下のコマンドを実行してEventBridge用のIAM Role作成します。この RoleはCodePipelineで利用します。
 CodePipelineを実行する際にCodeCommitの変更を検知する必要があるのですが、その際にこのIAM Roleが必要になります。
 
 ```sh
 aws cloudformation deploy --stack-name event-bridge-iam-role --template-file ./event-bridge-iam-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
 ```
 
-CodePipeline用のIAM Role作成します。CodePipelineは各サービスを束ねる役割あるため、束ねるサービスのIAM Policyが必要です。
+実行結果
+
+```text
+...(一部省略)
+Successfully created/updated stack - event-bridge-iam-role
+```
+
+以下のコマンドを実行してCodePipeline用のIAM Role作成します。CodePipelineは各サービスを束ねる役割あるため、束ねるサービスのIAM Policyが必要です。
 なお、CodeDeployやLambda、CloudFormationを利用していますが、CodePipelineでは直接触れないため、IAM Policyは不要です。
 
 ```sh
 aws cloudformation deploy --stack-name pipeline-iam-role --template-file ./pipeline-iam-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
+```
+
+実行結果
+
+```text
+...(一部省略)
+Successfully created/updated stack - pipeline-iam-role
 ```
 
 ### CodeBuildのプロジェクトを作成する
@@ -198,13 +226,19 @@ aws cloudformation deploy --stack-name code-build --template-file ./code-build.y
 CloudFormationでCodePipelineを構築します。
 以下のコマンドで`pipeline.yml`をCloudFormationで実行します。
 
-CodePipelineの構築が完了するとPipelineが動作します。
+CodePipelineの構築が完了するとPipelineが動作しますが、ここでは動作に失敗します。
 
 ```sh
 aws cloudformation deploy --stack-name pipeline --template-file ./pipeline.yml --tags Name=cicdhandson --profile cicd_handson
 ```
 
 ### sam_handsonブランチを切る
+
+リポジトリを参照するため、ディレクトリを変更します。
+
+```sh
+cd ~/Desktop/cicdhandson
+```
 
 新しいブランチでビルドを実行する為にCodeBuild用に新しくブランチを切ります。
 ハンズオンではmainブランチをビルド対象としています。ゆえにmainブランチを変更するのではなくmainブランチをソースに別のブランチを作成します。
@@ -273,6 +307,78 @@ COMMITID=`aws codecommit get-branch --repository-name cicdhandson --branch-name 
 ### ブランチをマージする
 
 PULL_REQUEST_IDとCOMMITIDを元にブランチをマージします。
+マージするとCodePipelineが動作します。AWSマネジメントコンソールを参照するとPipelineの動作を確認できます。
+[リンク](https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines)
+
+```sh
+aws codecommit merge-pull-request-by-fast-forward --pull-request-id $PULL_REQUEST_ID --source-commit-id $COMMITID --repository-name cicdhandson --profile cicd_handson
+```
+
+およそ3分程度でデプロイが完了します。CodeBuildのBuild history に`Succeeded`と表示されていれば、問題ありません。
+![10.png](./img/10.png)
+
+### CodeDeployでアプリケーションをデプロイ
+
+ここまででAWSにアプリケーションをデプロイできました。初回のデプロイではCodeDeployがどのようにデプロイするのかを確認できません。
+CodeDeployの動作を確認するためにはもう一度デプロイ動作を繰り返す必要があります。
+
+ソースコードやREADMEを修正するかリポジトリにファイルを追加します。追加したことをトリガーにデプロイを再実行します。
+
+新しくターミナルを開いて、`cicdhandson`リポジトリにディレクトリを変更します。
+
+```sh
+cd ~/Desktop/cicdhandson
+```
+
+利用するブランチを変更します。
+
+```sh
+git checkout sam_handson
+```
+
+README.mdを以下のコマンドで更新します。
+
+```sh
+echo "# Hello SAM" > README.md
+```
+
+リモートリポジトリを更新します。
+
+```sh
+git add .
+git commit -m "codedeploy"
+git push -u 
+```
+
+### プルリクエストを作成する(2回目)
+
+変更をmainブランチにマージするためにCodeCommit上でプルリクエストを作成します。
+
+```sh
+# プルリクエストを作成する
+aws codecommit create-pull-request --title "CodeDeploy" --description "codedeploy deploy" --targets repositoryName=cicdhandson,sourceReference=sam_handson --profile cicd_handson
+```
+
+```sh
+# プルリクエストIDを環境変数PULL_REQUEST_IDに保存する
+PULL_REQUEST_ID=`aws codecommit list-pull-requests --profile cicd_handson --pull-request-status OPEN --repository-name cicdhandson --query 'pullRequestIds' --output text` && echo $PULL_REQUEST_ID
+```
+
+```sh
+# リビジョンIDを環境変数REVISIONIDに保存する
+REVISIONID=`aws codecommit get-pull-request --pull-request-id $PULL_REQUEST_ID --profile cicd_handson --query 'pullRequest.revisionId' --output text` && echo $REVISIONID
+```
+
+```sh
+# コミットIDを環境変数COMMITIDに保存する
+COMMITID=`aws codecommit get-branch --repository-name cicdhandson --branch-name sam_handson --profile cicd_handson --query 'branch.commitId' --output text` && echo $COMMITID
+```
+
+### ブランチをマージする(2回目)
+
+PULL_REQUEST_IDとCOMMITIDを元にブランチをマージします。
+マージするとCodePipelineが動作します。AWSマネジメントコンソールを参照するとPipelineの動作を確認できます。
+[リンク](https://ap-northeast-1.console.aws.amazon.com/codesuite/codepipeline/pipelines)
 
 ```sh
 aws codecommit merge-pull-request-by-fast-forward --pull-request-id $PULL_REQUEST_ID --source-commit-id $COMMITID --repository-name cicdhandson --profile cicd_handson
@@ -280,7 +386,11 @@ aws codecommit merge-pull-request-by-fast-forward --pull-request-id $PULL_REQUES
 
 ### CodeDeployで動作を見る
 
-### 動作確認
+CodePipelineが動作している際にCodeDeployの画面を開くとアプリケーションへのトラフィックが徐々に移行していることがわかります。
+[CodeDeployのリンク](https://ap-northeast-1.console.aws.amazon.com/codesuite/codedeploy/deployments)
+
+※トラフィックが徐々に移行していることがわかる画面
+![11.png](./img/11.png)
 
 ## まとめ
 
