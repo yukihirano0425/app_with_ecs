@@ -1,247 +1,239 @@
 # part7
 
-## Builders IDの発行
+## 事前準備
+
+### Builders IDの発行
 
 [Amazon CodeCatalyst](https://codecatalyst.aws/explore)のホームページからSign upをクリックします。
 
-メールアドレスを入力します。
+![img](./img/1.png)
 
-## 事前準備
+メールアドレスを入力して次へをクリックします。
 
-[aws_happy_code - GitHub](https://github.com/ymd65536/aws_happy_code.git)をgitコマンドでDesktop上にcloneします。
+![img](./img/2-0.png)
 
-## IAMユーザーを作成する
+パスワードを入力して次へをクリックします。
+![img](./img/3-1.png)
 
-part5ディレクトリにある`iam_user.yml`を使ってハンズオンで利用するIAMユーザーを作成します。
-※すでにAdministratorAccessで権限を作成されている場合はこの動作は不要です。
+コード入力画面に切り替わりましたら、最初に入力したメールアドレス宛に届いているメールの内容を元にコードを入力します。
+![img](./img/4-0.png)
 
-AWSマネジメントコンソールを開き、CloudFormationを検索します。
-![1.png](./img/1.png)
+※以下のような内容でメールが届いています。
+![img](./img/4-1.png)
 
-`create stack`をクリックします。
-![2.png](./img/2.png)
+コードを入力して`Verify`をクリックします。
+![img](./img/4-2.png)
 
-画面の内容に沿って`iam_user.yml`を指定します。`Next`をクリックします。
-![3.png](./img/3.png)
+最後にパスワードを入力してAWS ビルダーIDを発行します。
+![img](./img/5.png)
 
-`cicdhandson-user`と入力して`Next`をクリックします。
-![4.png](./img/4.png)
+## メンション名を決める
 
-`I acknowledge that AWS CloudFormation might create IAM resources with custom names.`にチェックを入れて`Submmit`をクリックします。
-![6.png](./img/6.png)
+次にCodeCatalystの設定画面に移動します。※画面が遷移します。
 
-`CREATE_COMPLETE`と表示されましたら問題なくIAMユーザーが作成できています。
-![7.png](./img/7.png)
+Amazon CodeCatalystはプルリクエストベースのレビューが実行できるため、メンションという機能が備わっています。
+GitHubでソースコードのレビューをしたことがある人であれば、なんとなく想像がつくでしょう。
 
-問題なくスタックが作成できましたら`Outputs`からアクセスキーとシークレットアクセスきーをコピーします。
-![8.png](./img/8.png)
+このメンション名というのはレビューなどの時に利用するCodeCatalyst上の名前です。わかりやすい名前で設定しておきましょう。
+※執筆時点では後で変更することができない項目となっています。慎重に設定しましょう。
+![img](./img/6-1.png)
 
-## IAM Identity Centerを利用している場合
+## スペース名を決める
 
-IAMユーザーを利用しておらず、既にIAM Identity Centerを設定している場合は以下のコマンドを実行することで次の手順に進めます。
-`{Profile名}`にはご自分で作成したプロファイル名を指定します。
+CodeCatalystの設定場所となるSpaceを設定しましょう。このSpaceは複数のプロジェクトを内包します。
+![img](./img/6-4.png)
+
+## AWSアカウントとリンクする
+
+AWSのアカウントIDとAWS ビルダーIDをリンクします。
+12桁のAWSアカウントIDを入力します。
+
+![img](./img/6-6.png)
+
+`Go to the AWS console verify`をクリックします。
+
+![img](./img/6-5.png)
+
+`Verify space`をクリックします。
+
+![img](./img/6-7.png)
+
+`Account verited, you can return to Amazon CodeCatalyst`と表示されましたら前の画面に戻ります。
+![img](./img/6-9.png)
+
+`Next`をクリックします。
+![img](./img/7.png)
+
+## プロジェクトを作成する
+
+Spaceを作成しましたので次に実際にアプリケーションを置くプロジェクトを作成しましょう。
+`Create your first project`をクリックします。
+
+![img](./img/8.png)
+
+プロジェクト名を`handson`として`Create project`をクリックします。
+![img](./img/9.png)
+
+まだこの段階ではプロジェクトは作成できていません。プロジェクトを作成する場合はプロジェクトの種類を選択する必要があります。
+ハンズオンでは`Start from scratch`を選択します。
+![img](./img/10.png)
+
+`Create project`をクリックしてプロジェクトを作成します。
+
+## リポジトリを作成する
+
+ソースリポジトリを作成するために右側にサイドメニューから`Source repositories`をクリックします。
+画面中心にある`Add repository`の下三角マークをクリックします。
+
+![img](./img/12.png)
+
+`Create repository`をクリックします。
+
+![img](./img/13.png)
+
+`Repository name`、`description`を入力します。
+`.gitignore`は`None`のままで問題ありません。
+`Create`をクリックします。
+
+![img](./img/14.png)
+
+## リポジトリをクローンする
+
+catalystリポジトリをDesktopにクローンします。
+`Clone Repository`をクリックします。
+
+![img](./img/15.png)
+
+CodeCatalyst の画面からクローン用のURLとパスワードをコピーします。
+
+![img](./img/16.png)
+
+URLをコピーすると`Clone Cpied URL`と表示されます。
+他のテキストエディタを開いてURLを保存しておきます。
+次に`Create token`をクリックします。
+
+![img](./img/17.png)
+
+クリックすると`Personal Access token`が表示されますので右側にある`Copy`ボタンでコピーします。
+
+![img](./img/18.png)
+
+Clone 用のURLと`Personal Access Token`を使ってリポジトリをCloneします。
+
+以下のコマンドでリポジトリをクローンできます。初回クローン時にはパスワード(Personal Access Token)を聞かれます。
 
 ```sh
-aws sso login --profile {Profile名}
+git clone {コピーしたクローンのURL} ~/Desktop/catalyst
 ```
 
-プロファイル名は`credentials`を調べることでチェックできます。
+実行例
 
 ```sh
-cat ~/.aws/credentials 
+Desktop $ git clone https://{user_name}@git.us-west-2.codecatalyst.aws/v1/cicd-handson/handson/catalyst
+Cloning into 'catalyst'...
+Password for 'https://{user_name}@git.us-west-2.codecatalyst.aws/v1/cicd-handson/handson/catalyst':{ここにパスワードを貼り付け}
+remote: Counting objects: 3, done.
+Unpacking objects: 100% (3/3), 648 bytes | 129.00 KiB/s, done.
+Desktop $
 ```
 
-### AWS　CLIをにIAMユーザーを記録する
+## ブランチを作成
 
-AWS CLIを設定する為に以下のコマンドを実行します。
+ディレクトリを変更します。
 
 ```sh
-aws configure --profile cicd_handson
+cd ~/Desktop/catalyst
 ```
 
-いくつか質問がなされるので順番に回答します。ここで先ほどのアクセスキーとシークレットアクセスキーを利用します。
-`AWS Access Key Id`にアクセスキー、`AWS Secret Access Key`にシークレットアクセスキーを入力します。
-リージョンはap-northeast-1、出力形式はjsonで問題ありません。
-
-![9.png](./img/9.png)
-
-最後に設定されているかどうかを確認する為、`credentials`をチェックします。`[cicd_handson]`という項目が追加されていれば問題ありません。
+テストブランチを作成します。
 
 ```sh
-cat ~/.aws/credentials 
+git checkout -b test
 ```
 
-### リポジトリを作成する
-
-### リポジトリをクローンする
-
-### リモートリポジトリにプッシュ
+ブランチの一覧を確認します。
 
 ```sh
-echo "Hello App Runner" > README.md
+git branch
 ```
+
+実行結果
+
+```text
+catalyst $ git branch
+  main
+* test
+catalyst $
+```
+
+### READM.mdを変更してリモートリポジトリにプッシュする
+
+以下のコマンドを実行してREADMEを書き換えます。
+
+```sh
+echo "# Amazon CodeCatalyst Handson" > README.md
+```
+
+変更を反映してリポジトリにプッシュします。
 
 ```sh
 git add .
-git commit -m "App Runner"
-git push -u 
-```
-
-### CodeCatalystのプロジェクトにリポジトリを追加する
-
-CodeCatalyst の[Projects](https://codecatalyst.aws/spaces/cicdhandson/projects)を開き、`Create project`をクリックします。
-
-`Start from scratch`を選択して`Project name`を入力し、`Create project`をクリックします。
-
-### app_runner ブランチを切る
-
-新しいブランチでビルドを実行する為にCodeBuild用に新しくブランチを切ります。
-
-```sh
-git checkout -b app_runner
-```
-
-### buildspec.yamlを作成する
-
-CodeBuildで利用する設定ファイル(buildspec.yml)を作成します。
-aws_happy_codeリポジトリにある`buildspec.yml`を`cicdhandson`リポジトリにコピーします。
-
-```sh
-cp ~/Desktop/aws_happy_code/buildspec.yml ~/Desktop/cicdhandson/
-```
-
-### dockerfileを作成する
-
-dockerfileを`cicdhandson`リポジトリにコピーします。
-
-```sh
-cp ~/Desktop/aws_happy_code/dockerfile ~/Desktop/cicdhandson/
-```
-
-### リモートリポジトリを更新する
-
-CodeCommitのリモートリポジトリにdockerfileをpushします。
-リモートリポジトリにブランチを追加します。
-
-```sh
-git add .
-git commit -m "add files"
-git push --set-upstream origin app_runner
-```
-
-### CodeBuild用 S3バケットの作成
-
-cicdhandsonリポジトリに移動します。
-
-```sh
-cd ~/Desktop/cicdhandson
-```
-
-以下のコマンドで`s3.yml`をCloudFormationで実行します。
-
-```sh
-aws cloudformation deploy --stack-name s3 --template-file ./s3.yml --tags Name=cicdhandson --profile cicd_handson
-```
-
-### ECRリポジトリの作成
-
-以下のコマンドで`ecr.yml`をCloudFormationで実行します。
-
-```sh
-aws cloudformation deploy --stack-name ecr --template-file ./ecr.yml --tags Name=cicdhandson --profile cicd_handson
-```
-
-### ハンズオンで利用するIAM Roleを作成する
-
-以下のコマンドを実行してIAMロールを作成します。
-
-```sh
-aws cloudformation deploy --stack-name codebuild-iam-role --template-file ./codebuild-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson && aws cloudformation deploy --stack-name event-bridge-iam-role --template-file ./event-bridge-iam-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson && aws cloudformation deploy --stack-name pipeline-iam-role --template-file ./pipeline-iam-role.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
-
-```
-
-### CodePipeline を構築
-
-以下のコマンドを実行してCodePipelineのを構築します。
-
-```sh
-aws cloudformation deploy --stack-name code-build --template-file ./code-build.yml --tags Name=cicdhandson --profile cicd_handson && aws cloudformation deploy --stack-name pipeline --template-file ./pipeline.yml --tags Name=cicdhandson --profile cicd_handson
+git commit -am "Amazon CodeCatalyst Handson"
+git push --set-upstream origin test
 ```
 
 ### プルリクエストを作成する
 
-環境構築は以上となります。CodeCommitでプルリクエストを作成する為に以下のコマンドを実行します。
+リポジトリのREADME.mdが表示されている画面右上にあるMoreをクリックして`Create pull request`をクリックします。
 
-```sh
-aws codecommit create-pull-request --title "new pull request" --description "App Runner ci/cd" --targets repositoryName=cicdhandson,sourceReference=app_runner --profile cicd_handson && PULL_REQUEST_ID=`aws codecommit list-pull-requests --profile cicd_handson --pull-request-status OPEN --repository-name cicdhandson --query 'pullRequestIds' --output text` && echo $PULL_REQUEST_ID && COMMITID=`aws codecommit get-branch --repository-name cicdhandson --branch-name app_runner --profile cicd_handson --query 'branch.commitId' --output text` && echo $COMMITID
-```
+![img](./img/19.png)
 
-### ブランチをマージする
+`source branch`、`pull request title`、`pull request description`を入力します。
 
-プルリクエストをマージします。
+|項目|値|
+|:---|:---|
+|source branch|test|
+|pull request title|test pull request|
+|pull request description|test pull request|
 
-```sh
-aws codecommit merge-pull-request-by-fast-forward --pull-request-id $PULL_REQUEST_ID --source-commit-id $COMMITID --repository-name cicdhandson --profile cicd_handson
-```
+![img](./img/20.png)
 
-結果
+最後に右下の`Create`をクリックします。
 
-```json
-{
-    "pullRequest": {
-        "pullRequestId": "11",
-        "title": "new pull request",
-        "description": "App Runner ci/cd",
-        "lastActivityDate": "2023-06-15T20:25:04.181000+09:00",
-        "creationDate": "2023-06-15T20:23:08.812000+09:00",
-        "pullRequestStatus": "CLOSED",
-        "authorArn": "arn",
-        "pullRequestTargets": [
-            {
-                "repositoryName": "cicdhandson",
-                "sourceReference": "refs/heads/app_runner",
-                "destinationReference": "refs/heads/main",
-                "destinationCommit": "",
-                "sourceCommit": "",
-                "mergeBase": "",
-                "mergeMetadata": {
-                    "isMerged": true,
-                    "mergedBy": "arn",
-                    "mergeCommitId": "",
-                    "mergeOption": "FAST_FORWARD_MERGE"
-                }
-            }
-        ],
-        "clientRequestToken": "",
-        "revisionId": "",
-        "approvalRules": []
-    }
-}
-```
+![img](./img/21.png)
 
-### ビルドされたイメージを確認する
+以下のように緑の背景と共に`You've created pull request`と表示されたら問題なくプルリクエストが作成できています。
 
-CodeBuildでイメージがビルドされているかを確認します。
+![img](./img/22.png)
 
-```sh
-aws ecr list-images --profile cicd_handson --repository-name cicdhandson --query "imageIds[*].imageDigest" --output table
-```
+### プルリクエストをマージする
 
-結果
+リポジトリのREADME.mdの内容が表示されている画面の右上で`Merge`を実行します。
+`Merge`をクリックします。
 
-```text
------------------------------------------------------------------------------
-|                                ListImages                                 |
-+---------------------------------------------------------------------------+
-|  sha256:70f9eda4317cdce66c06fe1a699cae9bb1627cac91e1c9c6a09f6b3572fd56b4  |
-+---------------------------------------------------------------------------+
-```
+![img](./img/23.png)
 
-### App Runnerにコンテナをデプロイする
+`Fast forward merge`を選択して`Merge`をクリックします。
 
-```sh
-aws cloudformation deploy --stack-name apprunner --template-file ./app_runner.yml --tags Name=cicdhandson --capabilities CAPABILITY_NAMED_IAM --profile cicd_handson
-```
+![img](./img/24.png)
 
-実行結果
-![10.png](./img/10.png)
+以下のように緑の背景と共に`The pull request has been merged`と表示されたら問題なくブランチがマージできています。
+![img](./img/25.png)
+
+※PR1の右側でも確認できます。
+![img](./img/26.png)
+
+### マージされた結果を見る
+
+ソースリポジトリを開くために右側にサイドメニューから`Source repositories`をクリックします。
+
+![img](./img/27.png)
+
+catalystリポジトリをクリックします。
+![img](./img/28.png)
+
+README.mdが`Amazon Codecatalyst Handson`となっていれば、マージした内容が反映されています。
+
+![img](./img/29.png)
+
+## まとめ
