@@ -85,3 +85,11 @@ COMMITID=`aws codecommit get-branch --repository-name cicdhandson --branch-name 
 ```sh
 aws codecommit merge-pull-request-by-fast-forward --pull-request-id $PULL_REQUEST_ID --source-commit-id $COMMITID --repository-name cicdhandson --profile cicd_handson
 ```
+
+```sh
+aws ecr describe-repositories --profile cicd_handson --output json 
+```
+
+```sh
+aws ecr list-images --profile cicd_handson --repository-name cicdhandson --query "imageIds[*].imageDigest" --output table
+```
