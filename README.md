@@ -15,7 +15,7 @@
 - (Part8) CodeGuru ReviewerでCodeCommitを自動レビューする構成
 - (Part9) 総括
 
-## リソースを削除する手順
+## リソースを削除する手順(サービス毎)
 
 1. CodePipeline
 2. EventBridge
@@ -30,8 +30,17 @@ App Runnerを使っている場合(Part5)はApp Runnerの削除も忘れずに�
 ## CodePipelineリソースの削除
 
 ```sh
-CF_STACK_NAME=pipeline && CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
+CF_STACK_NAME=pipeline && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
 ```
+
+スタックのステータスを確認します。該当のスタックが存在しないことを確認します。
+`An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id pipeline does not exist`
+
+```sh
+CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS
+```
+
+スタックの一覧に該当のスタックが存在しないことを確認します。
 
 ```sh
 aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json --profile cicd_handson
@@ -40,22 +49,103 @@ aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json -
 ## CodeBuildリソースの削除
 
 ```sh
-CF_STACK_NAME=code-build && CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
+CF_STACK_NAME=code-build && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
 ```
+
+スタックのステータスを確認します。該当のスタックが存在しないことを確認します。
+以下のコマンド実行をします。
+
+```sh
+CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS
+```
+
+コマンド実行後に`An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id code-build does not exist`というレスポンスが出力されることを確認します。
+
+スタックの一覧に該当のスタックが存在しないことを確認します。
 
 ```sh
 aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json --profile cicd_handson
 ```
 
-## IAMリソースの削除
+## pipeline-iam-roleの削除
 
 ```sh
-CF_STACK_NAME=pipeline-iam-role && CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
-
-CF_STACK_NAME=codebuild-iam-role && CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
-
-CF_STACK_NAME=event-bridge-iam-role && CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
+CF_STACK_NAME=pipeline-iam-role && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
 ```
+
+スタックのステータスを確認します。該当のスタックが存在しないことを確認します。
+以下のコマンド実行をします。
+
+```sh
+CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS
+```
+
+コマンド実行後に`An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id pipeline-iam-role does not exist`というレスポンスが出力されることを確認します。
+
+スタックの一覧に該当のスタックが存在しないことを確認します。
+
+```sh
+aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json --profile cicd_handson
+```
+
+## codebuild-iam-roleの削除
+
+```sh
+CF_STACK_NAME=codebuild-iam-role && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
+```
+
+スタックのステータスを確認します。該当のスタックが存在しないことを確認します。
+以下のコマンド実行をします。
+
+```sh
+CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS
+```
+
+コマンド実行後に`An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id codebuild-iam-role does not exist`というレスポンスが出力されることを確認します。
+
+スタックの一覧に該当のスタックが存在しないことを確認します。
+
+```sh
+aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json --profile cicd_handson
+```
+
+## event-bridge-iam-roleの削除
+
+```sh
+CF_STACK_NAME=event-bridge-iam-role && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
+```
+
+スタックのステータスを確認します。該当のスタックが存在しないことを確認します。
+以下のコマンド実行をします。
+
+```sh
+CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS
+```
+
+コマンド実行後に`An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id event-bridge-iam-role does not exist`というレスポンスが出力されることを確認します。
+
+スタックの一覧に該当のスタックが存在しないことを確認します。
+
+```sh
+aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json --profile cicd_handson
+```
+
+## CodeCommitリソースの削除
+
+```sh
+CF_STACK_NAME=codecommit && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
+```
+
+スタックのステータスを確認します。該当のスタックが存在しないことを確認します。
+以下のコマンド実行をします。
+
+```sh
+CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS
+```
+
+コマンド実行後に`An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id codecommit does not exist`というレスポンスが出力されることを確認します。
+
+スタックの一覧に該当のスタックが存在しないことを確認します。
 
 ```sh
 aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json --profile cicd_handson
@@ -86,6 +176,31 @@ aws s3 rm s3://sam-build-bucket-{アカウントID} --recursive --profile cicd_h
 
 `permanently delete`と入力してS3バケットを空にします。
 
+## ECRリソースの削除
+
+ECRのイメージを削除します。
+
+{ここにECRのイメージ削除方法を記載する。}
+
+```sh
+CF_STACK_NAME=ecr && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
+```
+
+スタックのステータスを確認します。該当のスタックが存在しないことを確認します。
+以下のコマンド実行をします。
+
+```sh
+CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS
+```
+
+コマンド実行後に`An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id codecommit does not exist`というレスポンスが出力されることを確認します。
+
+スタックの一覧に該当のスタックが存在しないことを確認します。
+
+```sh
+aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json --profile cicd_handson
+```
+
 ## SAM用S3バケットの削除
 
 ```sh
@@ -102,13 +217,3 @@ aws s3 rm s3://sam-build-bucket-{アカウントID} --recursive --profile cicd_h
 {S3に関してはここから下はコンソールで作業}
 
 `permanently delete`と入力してS3バケットを空にします。
-
-## CodeCommitリソースの削除
-
-```sh
-CF_STACK_NAME=codecommit && CF_STACK_STATUS=`aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output json --profile cicd_handson` && echo $CF_STACK_STATUS && aws cloudformation delete-stack --stack-name $CF_STACK_NAME --profile cicd_handson
-```
-
-```sh
-aws cloudformation describe-stacks --query "Stacks[*].StackName" --output json --profile cicd_handson
-```
