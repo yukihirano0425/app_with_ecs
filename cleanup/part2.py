@@ -104,4 +104,9 @@ if __name__ == '__main__':
 
     for stack_name in stack_names:
         delete_stack(cloudformation=cloudformation, stackname=stack_name)
+
+    cloudwatch = session.client('logs')
+    cloudwatch.delete_log_group(
+        logGroupName='/aws/codebuild/cicdhandson'
+    )
     print("session end")
