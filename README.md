@@ -15,7 +15,9 @@
 - (Part8) CodeGuru ReviewerでCodeCommitを自動レビューする構成
 - (Part9) 総括
 
-## リソースを削除する方法(AWS SDK for Pythonを利用)
+## delete-resources
+
+リソースを削除する方法(AWS SDK for Pythonを利用)
 
 ### part2
 
