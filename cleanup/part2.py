@@ -99,6 +99,7 @@ if __name__ == '__main__':
         "ecr",
         "s3",
         "codecommit",
+        "cicdhandson-user"
     ]
 
     for stack_name in stack_names:
