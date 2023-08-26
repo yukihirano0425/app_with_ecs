@@ -115,7 +115,10 @@ if __name__ == '__main__':
         cloudwatch.delete_log_group(
             logGroupName='/aws/codebuild/cicdhandson'
         )
+    except Exception as e:
+        print(e)
 
+    try:
         cloudwatch = session.client('logs')
         cloudwatch.delete_log_group(
             logGroupName='/aws/lambda/cicdhandsonFunc'
