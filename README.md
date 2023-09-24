@@ -2,6 +2,10 @@
 
 ## CodeシリーズでハッピーなCI/CDを構築しよう
 
+## Python環境のアクティベート
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
 ## 章立て
 
 - (Part0) はじめにと本書で扱うサービス説明
